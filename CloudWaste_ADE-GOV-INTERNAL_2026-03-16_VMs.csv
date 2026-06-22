@@ -1,0 +1,4 @@
+"SubscriptionName","ResourceGroup","Name","Location","VMSize","OSType","PowerState","GovernanceStatus","CKID_Status","CKID","EMASS","VASI","DiskCount","TotalDiskGB","ComputeCost_Mo","DiskCost_Mo","ActualCost_Mo","WasteFlag","Details"
+"ADE-GOV-INTERNAL","ADE-DEVTEST-INT-EAST-ADE-RG","Ref01-25H2","usgovvirginia","Standard_B2s","Windows","VM deallocated","Billing Only","Mapped","1314","","","1","127","60.22","128","128","WASTE","OS:Premium_LRS:127GB=$128"
+"ADE-GOV-INTERNAL","ADE-DEVTEST-INT-EAST-ADE-RG","VAC20DEVADE300","usgovvirginia","Standard_E16-4s_v3","Windows","VM deallocated","Billing Only","Mapped","1314","","","1","512","1419.12","471.04","471.04","WASTE","OS:Premium_LRS:512GB=$471.04"
+"ADE-GOV-INTERNAL","ADE-PREPROD-INT-EAST-ADE-RG","VAC20DEVADE400","usgovvirginia","Standard_D8s_v3","Windows","VM running","Billing Only","Mapped","1314","","","2","2304","636.56","1966.08","2602.64","","OS:Premium_LRS:256GB=$245.76 | Data:Premium_LRS:2048GB=$1720.32"

@@ -1,0 +1,3 @@
+"SubscriptionName","SubscriptionId","ResourceGroup","VMName","Location","VMSize","OSType","PowerState","GovernanceStatus","CKID_Status","CKID","EMASS","VASI","EstMonthly_USD","CAM_CMDB_Verified","Notes"
+"BMS-GOV-INTERNAL","b0a67ed8-14ea-4e68-83f6-8a7d32ea06d1","BMS-DEVTEST-INT-SOUTH-BMS-RG","vac21gatbms800","usgovtexas","Standard_B2as_v2","Windows","Unknown","Billing Only","Mapped","65","","","75.19","",""
+"BMS-GOV-INTERNAL","b0a67ed8-14ea-4e68-83f6-8a7d32ea06d1","BMS-PREPROD-INT-SOUTH-BMS-RG","VAC21GATBMS400","usgovtexas","Standard_B2as_v2","Windows","Unknown","Billing Only","Mapped","65","","","75.19","",""

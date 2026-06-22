@@ -1,0 +1,4 @@
+"SubscriptionName","SubscriptionId","ResourceGroup","VMName","Location","VMSize","OSType","PowerState","CKID_Status","CKID","EMASS","VASI","EstMonthly_USD"
+"ADE-GOV-INTERNAL","ca58df44-ef7e-4dc1-ad44-7ffad036cc3d","ADE-DEVTEST-INT-EAST-ADE-RG","Ref01-25H2","usgovvirginia","Standard_B2s","Windows","Unknown","Mapped","1314","","","60.22"
+"ADE-GOV-INTERNAL","ca58df44-ef7e-4dc1-ad44-7ffad036cc3d","ADE-DEVTEST-INT-EAST-ADE-RG","VAC20DEVADE300","usgovvirginia","Standard_E16-4s_v3","Windows","Unknown","Mapped","1314","","","1,419.12"
+"ADE-GOV-INTERNAL","ca58df44-ef7e-4dc1-ad44-7ffad036cc3d","ADE-PREPROD-INT-EAST-ADE-RG","VAC20DEVADE400","usgovvirginia","Standard_D8s_v3","Windows","Unknown","Mapped","1314","","","636.56"
