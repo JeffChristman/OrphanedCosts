@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Sentinel Config vs. VA Report - Delta Analysis</title>
+<style>
+ body{font-family:Segoe UI,Arial,sans-serif;margin:0;color:#1a1a1a;background:#f4f6f8;}
+ .banner{background:#fff3cd;border:1px solid #ffe69c;color:#664d03;padding:10px 24px;font-size:12px;font-weight:600;}
+ .hdr{background:#0b3d6b;color:#fff;padding:24px;}
+ .hdr h1{margin:0;font-size:22px;} .hdr p{margin:4px 0 0;font-size:13px;opacity:.85;}
+ .wrap{max-width:1320px;margin:20px auto;padding:0 24px;}
+ .meta{background:#fff;border-radius:8px;padding:16px 20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:13px;}
+ .meta b{display:inline-block;width:180px;color:#0b3d6b;}
+ .sum{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+ .pill{background:#fff;border-radius:8px;padding:10px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:13px;display:flex;flex-direction:column;}
+ .pill b{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;}
+ .pill span{font-size:22px;font-weight:700;}
+ .callout{background:#fff4f4;border:1px solid #f3c2c2;border-radius:8px;padding:16px 20px;margin-bottom:20px;}
+ .callout h2{margin:0 0 8px;font-size:16px;color:#7d1414;}
+ .callout ul{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.6;}
+ table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+ th{background:#0b3d6b;color:#fff;text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+ td{padding:10px 12px;border-top:1px solid #eee;font-size:12.5px;vertical-align:top;}
+ tr:nth-child(even) td{background:#fafbfc;}
+ .badge{color:#fff;padding:2px 10px;border-radius:12px;font-weight:600;font-size:11px;display:inline-block;}
+ .sub{color:#888;font-size:11px;margin-top:3px;}
+ .claim{color:#555;font-style:italic;max-width:260px;}
+ .flag{display:block;color:#c62828;font-size:10px;font-weight:600;margin-top:4px;}
+ .foot{text-align:center;color:#888;font-size:11px;margin:24px 0;}
+</style></head><body>
+<div class="banner">FOR OFFICIAL USE ONLY (FOUO) &mdash; PRE-DECISIONAL. Handle per DHS/VA policy. Not for public release.</div>
+<div class="hdr">
+  <h1>Microsoft Sentinel - Live Configuration vs. VA CSOC Report Delta</h1>
+  <p>Blended baseline: CIS Azure Foundations &bull; Microsoft Sentinel best practices &bull; NIST SP 800-53 Rev 5</p>
+</div>
+<div class="wrap">
+  <div class="meta">
+    <div><b>Central Workspace:</b> vaecla-security-gov</div>
+    <div><b>Cloud:</b> AzureUSGovernment</div>
+    <div><b>Subscriptions Checked:</b> 106</div>
+    <div><b>Data Collected:</b> 06/29/2026 13:38:55</div>
+    <div><b>Analysis Generated:</b> 2026-06-29 13:39:26 UTC</div>
+    <div><b>Compared Against:</b> VA CSOC Toolset Configuration Report, Dec 22, 2025</div>
+  </div>
+  <div class="sum"><div class='pill' style='border-left:5px solid #c62828'><b>GAP</b><span>2</span></div>
+<div class='pill' style='border-left:5px solid #ef6c00'><b>REVIEW</b><span>1</span></div>
+<div class='pill' style='border-left:5px solid #2e7d32'><b>PASS</b><span>4</span></div>
+<div class='pill' style='border-left:5px solid #1565c0'><b>INFO</b><span>1</span></div></div>
+  <div class="callout">
+  <h2>&#9888; Where the original report understated a gap</h2>
+  <p>The VA report framed the items below as routine "optimization opportunities" or stated capabilities the live configuration does not fully support. These warrant attention beyond the report's tone:</p>
+  <ul><li><b>Automation Rules</b> &mdash; report tone: <i>optimization</i>; observed: 0 automation rules configured</li>
+<li><b>UEBA</b> &mdash; report tone: <i>optimization</i>; observed: enabled=; sources=AuditLogs, AzureActivity, SecurityEvent, SigninLogs</li></ul>
+</div>
+  <table>
+    <thead><tr>
+      <th>Area / Report Section</th><th>Status</th><th>Baseline (CIS / MS / NIST)</th>
+      <th>Expected</th><th>Observed (Live)</th><th>What the Report Said</th><th>Recommendation</th>
+    </tr></thead>
+    <tbody><tr>
+  <td><b>Automation Rules</b><div class="sub">3.1 Absence of Automation Rules</div></td>
+  <td><span class="badge" style="background:#c62828">GAP</span><span class='flag'>&#9888; Report understated</span></td>
+  <td>CIS Azure 5 / NIST IR-4(1), SI-4 / MS SOAR best practice</td>
+  <td>At least baseline automation rules to trigger playbooks</td>
+  <td>0 automation rules configured</td>
+  <td class="claim">Automation rules &#39;have not yet been widely implemented&#39;; framed as expected in maturing deployments.</td>
+  <td>Report framed this as a maturity &#39;opportunity,&#39; but zero automation rules means playbooks are not orchestrated at all - manual triage only. Introduce rules for routing, tagging, enrichment, escalation.</td>
+</tr>
+<tr>
+  <td><b>UEBA</b><div class="sub">3.6 UEBA Not Fully Configured</div></td>
+  <td><span class="badge" style="background:#c62828">GAP</span><span class='flag'>&#9888; Report understated</span></td>
+  <td>CIS Azure 1.x (identity) / NIST AU-6(3), SI-4 / MS UEBA best practice</td>
+  <td>UEBA enabled with identity + endpoint sources feeding entity profiles</td>
+  <td>enabled=; sources=AuditLogs, AzureActivity, SecurityEvent, SigninLogs</td>
+  <td class="claim">UEBA &#39;fully enabled&#39; in Government; onboarding underway for Commercial.</td>
+  <td>Confirm AzureAD, Signin, Audit, and endpoint logs all contribute; exclude high-volume service/non-human accounts to reduce noise.</td>
+</tr>
+<tr>
+  <td><b>Summary Rules</b><div class="sub">3.2 Lack of Summary Rules</div></td>
+  <td><span class="badge" style="background:#ef6c00">REVIEW</span></td>
+  <td>MS Sentinel best practice (cost/perf) / NIST AU-6</td>
+  <td>Summary rules on Sign-in/Audit/Firewall-class high-volume logs</td>
+  <td>0 summary rule(s) found</td>
+  <td class="claim">Summary rules &#39;have not been broadly deployed&#39;; called &#39;not required for normal functionality.&#39;</td>
+  <td>Deploy where Gov parity allows for investigation speed and cost control.</td>
+</tr>
+<tr>
+  <td><b>Data Connectors &amp; Ingestion</b><div class="sub">3.3 Misconfigured Data Connectors</div></td>
+  <td><span class="badge" style="background:#2e7d32">PASS</span></td>
+  <td>CIS Azure 5.1.x / NIST AU-2, AU-12 / MS connector health</td>
+  <td>Connectors healthy and core security tables ingesting continuously</td>
+  <td>105 connector(s); core tables fresh: SigninLogs, AuditLogs, AzureActivity, Syslog</td>
+  <td class="claim">&#39;A small number of connectors can be further refined&#39;; framed as typical optimization.</td>
+  <td>Maintain connector health monitoring.</td>
+</tr>
+<tr>
+  <td><b>Analytics / Alerting Coverage</b><div class="sub">3.5 Limited Alerting</div></td>
+  <td><span class="badge" style="background:#2e7d32">PASS</span></td>
+  <td>CIS Azure 5.2.x + 1.x / NIST SI-4, AU-6 / MS analytics best practice</td>
+  <td>&gt;= 25 enabled rules incl. identity/privilege/access detections</td>
+  <td>54 enabled rule(s); 19 match identity/access categories</td>
+  <td class="claim">&#39;Functional analytics and alerting in place&#39;; opportunity to expand coverage.</td>
+  <td>Report described alerting as &#39;functional&#39; with room to expand. If enabled rule count or identity/privilege coverage is low, that is a detection gap, not just tuning - add identity-anomaly, privilege-escalation, access rules.</td>
+</tr>
+<tr>
+  <td><b>Content Hub Currency</b><div class="sub">3.7 Content Hub Not Fully Updated</div></td>
+  <td><span class="badge" style="background:#2e7d32">PASS</span></td>
+  <td>MS Sentinel content best practice / NIST SI-3, SI-4 (detection currency)</td>
+  <td>Installed Content Hub packages kept at latest version</td>
+  <td>0 installed, all current</td>
+  <td class="claim">&#39;Some packages remain available for update&#39;; framed as normal.</td>
+  <td>Maintain monthly review cadence.</td>
+</tr>
+<tr>
+  <td><b>Subscription Log Forwarding</b><div class="sub">(not covered in report)</div></td>
+  <td><span class="badge" style="background:#2e7d32">PASS</span></td>
+  <td>CIS Azure 5.1.x / NIST AU-2, AU-12</td>
+  <td>Every subscription forwards Activity Log to the central workspace</td>
+  <td>106 of 106 subscription(s) forward Activity Log to central workspace</td>
+  <td class="claim">The report does not assess whether all subscriptions forward logs to the central workspace.</td>
+  <td>The original report does NOT assess central log forwarding at all. Any subscription not forwarding is a blind spot the report never surfaced - enforce via Azure Policy (DeployIfNotExists) on diagnostic settings.</td>
+</tr>
+<tr>
+  <td><b>Workspace Manager (Preview)</b><div class="sub">3.4 Workspace Manager in Preview</div></td>
+  <td><span class="badge" style="background:#1565c0">INFO</span></td>
+  <td>Governance / NIST CM-2 (baseline config)</td>
+  <td>Monitor only until GA &amp; FedRAMP-validated for Gov</td>
+  <td>Onboarding state present</td>
+  <td class="claim">Absence is &#39;expected and appropriate&#39; due to Preview status under FedRAMP; monitor only.</td>
+  <td>Agree with report: absence is appropriate under FedRAMP. Track Preview-&gt;GA and reassess for multi-workspace governance at that point.</td>
+</tr></tbody>
+  </table>
+  <div class="foot">FOR OFFICIAL USE ONLY &bull; PRE-DECISIONAL &bull; Delta analysis generated from collector JSON. Baselines are closest-fit control families, not literal one-to-one citations; validate against the authoritative benchmark version in force.</div>
+</div></body></html>

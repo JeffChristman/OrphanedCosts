@@ -48,8 +48,9 @@
 # Source folders to scan. All subfolders are searched recursively.
 # NOTE: The third entry below is a duplicate of the second — see .NOTES above.
 $sourceFolders = @(
-    "C:\Users\OITNSMCHRISJ\OneDrive - Department of Veterans Affairs\_Shared Documents - Cloud Surge (5.20)\4.4-5.8 CTS\CTS Assessments\System Reports\2025 September System Reports",
-    "C:\Users\OITNSMCHRISJ\OneDrive - Department of Veterans Affairs\_Shared Documents - Cloud Surge (5.20)\4.4-5.8 CTS\CTS Assessments\System Reports\CY26 System Reports"
+    "C:\Users\OITNSMCHRISJ\OneDrive - Department of Veterans Affairs\_Shared Documents - Cloud Surge (5.20)\4.4-5.8​ CTS\CTS Assessments\System Reports\2025 September System Reports",
+    "C:\Users\OITNSMCHRISJ\OneDrive - Department of Veterans Affairs\_Shared Documents - Cloud Surge (5.20)\4.4-5.8​ CTS\CTS Assessments\System Reports\CY26 System Reports"
+    
     
 )
 
