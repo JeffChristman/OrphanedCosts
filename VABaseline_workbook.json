@@ -1,0 +1,1566 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "help-001",
+            "version": "KqlParameterItem/1.0",
+            "name": "Help",
+            "label": "🔎 Getting Started",
+            "type": 10,
+            "isRequired": true,
+            "typeSettings": { "showDefault": false },
+            "jsonData": "[\r\n    {\"value\": \"Yes\", \"label\": \"Yes\"},\r\n    {\"value\": \"No\", \"label\": \"No\", \"selected\":true}\r\n]",
+            "value": "No"
+          },
+          {
+            "id": "defaultsub-001",
+            "version": "KqlParameterItem/1.0",
+            "name": "DefaultSubscription_Internal",
+            "type": 1,
+            "isRequired": true,
+            "query": "where type =~ 'microsoft.operationalinsights/workspaces'\r\n| take 1\r\n| project subscriptionId",
+            "crossComponentResources": [ "value::selected" ],
+            "isHiddenWhenLocked": true,
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "sub-001",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscription",
+            "type": 6,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "summarize by subscriptionId\r\n| project value = strcat(\"/subscriptions/\", subscriptionId), label = subscriptionId, selected = iff(subscriptionId =~ '{DefaultSubscription_Internal}', true, false)",
+            "crossComponentResources": [ "value::all" ],
+            "typeSettings": {
+              "additionalResourceOptions": [ "value::all" ],
+              "showDefault": false
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources",
+            "value": [ "value::all" ]
+          },
+          {
+            "id": "ws-001",
+            "version": "KqlParameterItem/1.0",
+            "name": "Workspace",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "resources\r\n| where type =~ 'microsoft.operationalinsights/workspaces'\r\n| order by name asc\r\n| summarize Selected = makelist(id, 10), All = makelist(id, 1000)\r\n| mvexpand All limit 100\r\n| project value = tostring(All), label = tostring(All), selected = iff(Selected contains All, true, false)",
+            "crossComponentResources": [ "{Subscription}" ],
+            "typeSettings": {
+              "additionalResourceOptions": [ "value::all" ],
+              "showDefault": false
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources",
+            "value": [ "value::all" ]
+          },
+          {
+            "id": "cisstd-001",
+            "version": "KqlParameterItem/1.0",
+            "name": "CISStandard",
+            "label": "CIS Standard",
+            "type": 2,
+            "isRequired": true,
+            "typeSettings": { "showDefault": false },
+            "jsonData": "[\r\n    {\"value\": \"CIS Microsoft Azure Foundations Benchmark v2.0.0\", \"label\": \"CIS Azure Foundations v2.0.0\", \"selected\":true},\r\n    {\"value\": \"CIS Microsoft Azure Foundations Benchmark v1.4.0\", \"label\": \"CIS Azure Foundations v1.4.0\"},\r\n    {\"value\": \"CIS Microsoft Azure Foundations Benchmark v1.3.0\", \"label\": \"CIS Azure Foundations v1.3.0\"},\r\n    {\"value\": \"CIS Microsoft Azure Foundations Benchmark v1.1.0\", \"label\": \"CIS Azure Foundations v1.1.0\"}\r\n]",
+            "value": "CIS Microsoft Azure Foundations Benchmark v2.0.0"
+          },
+          {
+            "id": "cwurl-001",
+            "version": "KqlParameterItem/1.0",
+            "name": "CrosswalkUrl",
+            "label": "Crosswalk URL",
+            "type": 1,
+            "description": "HTTPS URL to your hosted VA-CIS-Crosswalk.csv (blob+SAS, SharePoint raw, or internal git raw). Used by the VA Baseline Crosswalk tab.",
+            "value": ""
+          },
+          {
+            "id": "tr-001",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "value": { "durationMs": 604800000 },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 14400000 },
+                { "durationMs": 43200000 },
+                { "durationMs": 86400000 },
+                { "durationMs": 604800000 },
+                { "durationMs": 1209600000 },
+                { "durationMs": 2592000000 }
+              ],
+              "allowCustom": true
+            }
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "Parameter Selectors"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## Getting Started\r\nThis workbook aligns to the **CIS Microsoft Azure Foundations Benchmark**. It blends two data sources:\r\n\r\n1. **Microsoft Defender for Cloud → Regulatory Compliance** (compliance posture per CIS control). Requires the CIS standard be added to your dashboard. See [Add a regulatory standard](https://learn.microsoft.com/azure/defender-for-cloud/update-regulatory-compliance-packages).\r\n2. **Azure Resource Graph** (live resource configuration) for direct checks such as public network access, NSG rules allowing 0.0.0.0/0, encryption settings, and Key Vault access policies. These work even without Defender for Cloud.\r\n\r\nUse the **CIS Standard** selector to match your benchmark version, then navigate the section tabs (IAM, Defender for Cloud, Storage, Database, Logging & Monitoring, Networking, Virtual Machines, Key Vault, App Service). Each section contains a Control Card with an implementation status tracker plus query panels.\r\n\r\n### Print / Export\r\n1️⃣ Settings → Appearance → Theme: Azure → Apply<br>\r\n2️⃣ More Content Actions (…) → Print Content<br>\r\n3️⃣ Layout: Landscape, Scale ~60, Margins: None → Print\r\n\r\n### Disclaimer\r\nThis workbook provides visibility and situational awareness. It does not guarantee or imply compliance. Recommendations are a starting point; validate against your organization's control requirements.",
+        "style": "info"
+      },
+      "conditionalVisibility": {
+        "parameterName": "Help",
+        "comparison": "isEqualTo",
+        "value": "Yes"
+      },
+      "name": "Help"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# CIS Microsoft Azure Foundations Benchmark — Security Posture\r\n---\r\nThis solution enables Cloud Architects, Security Engineers, and GRC professionals to assess and monitor Azure security posture against the CIS Microsoft Azure Foundations Benchmark. It leverages Azure Resource Graph, Azure Monitor / Log Analytics, and Microsoft Defender for Cloud."
+            },
+            "customWidth": "79",
+            "name": "Overview"
+          },
+          {
+            "type": 11,
+            "content": {
+              "version": "LinkItem/1.0",
+              "style": "nav",
+              "links": [
+                {
+                  "id": "lnk-1",
+                  "cellValue": "https://www.cisecurity.org/benchmark/azure",
+                  "linkTarget": "Url",
+                  "linkLabel": "CIS Benchmark",
+                  "style": "link"
+                },
+                {
+                  "id": "lnk-2",
+                  "cellValue": "https://learn.microsoft.com/azure/defender-for-cloud/update-regulatory-compliance-packages",
+                  "linkTarget": "Url",
+                  "linkLabel": "Enable CIS in Defender",
+                  "style": "link"
+                },
+                {
+                  "id": "lnk-3",
+                  "cellValue": "https://learn.microsoft.com/azure/governance/resource-graph/overview",
+                  "linkTarget": "Url",
+                  "linkLabel": "Azure Resource Graph",
+                  "style": "link"
+                }
+              ]
+            },
+            "name": "links"
+          }
+        ]
+      },
+      "name": "title-group"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "{\"version\":\"1.0.0\",\"content\":\"[\\r\\n\\t{ \\\"CIS Sections\\\": \\\"Executive Summary\\\", \\\"tab\\\": \\\"SUM\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"1. Identity & Access Mgmt\\\", \\\"tab\\\": \\\"IAM\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"2. Defender for Cloud\\\", \\\"tab\\\": \\\"DFC\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"3. Storage Accounts\\\", \\\"tab\\\": \\\"STO\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"4. Database Services\\\", \\\"tab\\\": \\\"DB\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"5. Logging & Monitoring\\\", \\\"tab\\\": \\\"LOG\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"6. Networking\\\", \\\"tab\\\": \\\"NET\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"7. Virtual Machines\\\", \\\"tab\\\": \\\"VM\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"8. Key Vault\\\", \\\"tab\\\": \\\"KV\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"9. App Service\\\", \\\"tab\\\": \\\"APP\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"10. Miscellaneous\\\", \\\"tab\\\": \\\"MISC\\\" },\\r\\n\\t{ \\\"CIS Sections\\\": \\\"📋 VA Baseline Crosswalk\\\", \\\"tab\\\": \\\"VAX\\\" }\\r\\n]\",\"transformers\":null}",
+        "size": 3,
+        "exportMultipleValues": true,
+        "exportedParameters": [
+          { "fieldName": "tab", "parameterName": "Tab", "parameterType": 1 }
+        ],
+        "queryType": 8,
+        "gridSettings": {
+          "formatters": [
+            { "columnMatch": "tab", "formatter": 5 }
+          ]
+        }
+      },
+      "name": "Section Tabs",
+      "styleSettings": { "showBorder": true }
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "vis-SUM",
+            "version": "KqlParameterItem/1.0",
+            "name": "isSUMVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "SUM", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-IAM",
+            "version": "KqlParameterItem/1.0",
+            "name": "isIAMVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "IAM", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-DFC",
+            "version": "KqlParameterItem/1.0",
+            "name": "isDFCVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "DFC", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-STO",
+            "version": "KqlParameterItem/1.0",
+            "name": "isSTOVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "STO", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-DB",
+            "version": "KqlParameterItem/1.0",
+            "name": "isDBVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "DB", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-LOG",
+            "version": "KqlParameterItem/1.0",
+            "name": "isLOGVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "LOG", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-NET",
+            "version": "KqlParameterItem/1.0",
+            "name": "isNETVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "NET", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-VM",
+            "version": "KqlParameterItem/1.0",
+            "name": "isVMVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "VM", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-KV",
+            "version": "KqlParameterItem/1.0",
+            "name": "isKVVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "KV", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-APP",
+            "version": "KqlParameterItem/1.0",
+            "name": "isAPPVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "APP", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-MISC",
+            "version": "KqlParameterItem/1.0",
+            "name": "isMISCVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "MISC", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          },
+          {
+            "id": "vis-VAX",
+            "version": "KqlParameterItem/1.0",
+            "name": "isVAXVisible",
+            "type": 1,
+            "isHiddenWhenLocked": true,
+            "criteriaData": [
+              { "criteriaContext": { "leftOperand": "Tab", "operator": "contains", "rightValType": "static", "rightVal": "VAX", "resultValType": "static", "resultVal": "true" } },
+              { "criteriaContext": { "operator": "Default", "rightValType": "param", "resultValType": "static", "resultVal": "false" } }
+            ],
+            "timeContext": { "durationMs": 86400000 }
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "customWidth": "10",
+      "name": "Hidden Visibility Parameters"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# Executive Summary\r\n---\r\nOverall CIS posture pulled from Microsoft Defender for Cloud's Regulatory Compliance assessments for the selected **{CISStandard}** standard. Use the \"Remediate\" deep-links to pivot directly to the recommendation. If panels are empty, confirm the CIS standard is enabled in Defender for Cloud → Regulatory Compliance."
+            },
+            "name": "sum-guide"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/regulatorycompliancestandards/regulatorycompliancecontrols/regulatorycomplianceassessments\"\r\n| extend complianceStandardId = replace_string(extract(@'/regulatoryComplianceStandards/([^/]*)', 1, id), '-', ' ')\r\n| where complianceStandardId contains \"CIS\"\r\n| extend complianceControlId = extract(@'/regulatoryComplianceControls/([^/]*)', 1, id)\r\n| extend state = tostring(properties.state)\r\n| summarize Passed = countif(state == \"Passed\"), Failed = countif(state == \"Failed\"), Skipped = countif(state == \"Skipped\"), Total = count() by complianceControlId\r\n| extend PassRate = round((Passed * 100.0) / iff(Total == 0, 1, Total), 1)\r\n| project ControlId = complianceControlId, Total, PassRate, Passed, Failed, Skipped\r\n| sort by Failed desc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "CIS Posture by Control",
+              "noDataMessage": "No CIS compliance data. Enable the CIS standard in Defender for Cloud → Regulatory Compliance, then allow time for assessments to populate.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "Total",
+                    "formatter": 22,
+                    "formatOptions": {
+                      "compositeBarSettings": {
+                        "labelText": "[\"Passed\"]/[\"Total\"]",
+                        "columnSettings": [
+                          { "columnName": "Passed", "color": "green" },
+                          { "columnName": "Failed", "color": "redBright" }
+                        ]
+                      }
+                    }
+                  },
+                  { "columnMatch": "PassRate", "formatter": 0, "numberFormat": { "unit": 1, "options": { "style": "decimal", "maximumFractionDigits": 1 } } },
+                  { "columnMatch": "Passed", "formatter": 5 },
+                  { "columnMatch": "Failed", "formatter": 5 },
+                  { "columnMatch": "Skipped", "formatter": 5 }
+                ],
+                "filter": true
+              }
+            },
+            "customWidth": "50",
+            "name": "sum-by-control"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/assessments\"\r\n| extend status = tostring(properties.status.code)\r\n| where status == \"Unhealthy\"\r\n| extend severity = tostring(properties.metadata.severity)\r\n| extend displayName = tostring(properties.displayName)\r\n| extend resourceId = tolower(tostring(properties.resourceDetails.Id))\r\n| summarize Failed = count() by displayName, severity\r\n| sort by Failed desc\r\n| limit 250",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Failing Recommendations (Defender for Cloud)",
+              "noDataMessage": "No unhealthy assessments found, or Defender for Cloud is not enabled.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "Failed", "formatter": 4, "formatOptions": { "palette": "yellowOrangeRed" } },
+                  {
+                    "columnMatch": "severity",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "colors",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "High", "representation": "redBright", "text": "{0}{1}" },
+                        { "operator": "==", "thresholdValue": "Medium", "representation": "orange", "text": "{0}{1}" },
+                        { "operator": "==", "thresholdValue": "Low", "representation": "yellow", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "blue", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "customWidth": "50",
+            "name": "sum-failing-recs"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/securescores\"\r\n| extend current = toint(properties.score.current), max = toint(properties.score.max), pct = round(todouble(properties.score.percentage) * 100, 1)\r\n| project Subscription = subscriptionId, ['Secure Score'] = current, ['Max'] = max, ['Percentage'] = pct\r\n| sort by ['Percentage'] asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Secure Score by Subscription",
+              "noDataMessage": "No secure score data. Enable Microsoft Defender for Cloud.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "Percentage", "formatter": 8, "formatOptions": { "min": 0, "max": 100, "palette": "redGreen" } }
+                ],
+                "filter": true
+              }
+            },
+            "name": "sum-secure-score"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isSUMVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "Executive Summary"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# CIS Section 1 — Identity & Access Management\r\n---\r\nCovers MFA enforcement, guest accounts, custom roles, and credential hygiene (CIS 1.x). Identity config largely surfaces through Defender for Cloud recommendations and Entra ID sign-in/audit logs.\r\n\r\n### Recommended Logs\r\n🔷 SigninLogs · AuditLogs (Microsoft Entra ID)\r\n\r\n### Microsoft Portals\r\n🔀 [Microsoft Entra ID](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Overview) · [Defender for Cloud](https://portal.azure.com/#blade/Microsoft_Azure_Security/SecurityMenuBlade/0)"
+            },
+            "customWidth": "50",
+            "name": "iam-guide"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "iam-status",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "IAMImplementationStatus",
+                  "label": "Implementation Status",
+                  "type": 2,
+                  "typeSettings": { "showDefault": false },
+                  "jsonData": "[\r\n    {\"value\": \"Not Implemented\", \"label\": \"Not Implemented\", \"selected\":true},\r\n    {\"value\": \"Implemented\", \"label\": \"Implemented\"},\r\n    {\"value\": \"Compensating Control\", \"label\": \"Compensating Control\"},\r\n    {\"value\": \"Planned\", \"label\": \"Planned\"},\r\n    {\"value\": \"Out of Scope\", \"label\": \"Out of Scope\"}\r\n]"
+                },
+                {
+                  "id": "iam-notes",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "IAMNotes",
+                  "label": "Notes",
+                  "type": 1,
+                  "value": ""
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "customWidth": "50",
+            "name": "iam-card"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/assessments\"\r\n| extend displayName = tostring(properties.displayName), status = tostring(properties.status.code), severity = tostring(properties.metadata.severity)\r\n| where status == \"Unhealthy\"\r\n| where displayName has_any (\"MFA\", \"multi-factor\", \"guest\", \"owner\", \"deprecated account\", \"external account\", \"custom role\", \"co-administrator\")\r\n| summarize Failed = count() by displayName, severity\r\n| sort by Failed desc\r\n| limit 250",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "IAM Recommendations (CIS 1.x)",
+              "noDataMessage": "No failing IAM recommendations, or Defender for Cloud is not enabled.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "Failed", "formatter": 4, "formatOptions": { "palette": "yellowOrangeRed" } },
+                  {
+                    "columnMatch": "severity",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "colors",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "High", "representation": "redBright", "text": "{0}{1}" },
+                        { "operator": "==", "thresholdValue": "Medium", "representation": "orange", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "yellow", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "customWidth": "50",
+            "name": "iam-recs"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "SigninLogs\r\n| extend MFA = tostring(parse_json(AuthenticationDetails)[0].authenticationStepResultDetail)\r\n| summarize SignIns = count() by ConditionalAccessStatus, ResultType\r\n| sort by SignIns desc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Sign-ins by Conditional Access Status (Entra ID)",
+              "noDataMessage": "No SigninLogs in workspace. Connect Entra ID diagnostic settings.",
+              "timeContextFromParameter": "TimeRange",
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [ "{Workspace}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "SignIns", "formatter": 4, "formatOptions": { "palette": "blue" } }
+                ],
+                "filter": true
+              }
+            },
+            "customWidth": "50",
+            "name": "iam-signins"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isIAMVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "IAM"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# CIS Section 2 — Microsoft Defender for Cloud\r\n---\r\nVerifies Defender plans are enabled across resource types and that auto-provisioning, email notifications, and security contacts are configured (CIS 2.x)."
+            },
+            "name": "dfc-guide"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/pricings\"\r\n| extend tier = tostring(properties.pricingTier)\r\n| project Subscription = subscriptionId, Plan = name, ['Pricing Tier'] = tier\r\n| sort by Plan asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Defender for Cloud Plans (CIS 2.1.x)",
+              "noDataMessage": "No Defender pricing data available for the selected subscriptions.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "Pricing Tier",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "Standard", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "==", "thresholdValue": "Free", "representation": "3", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "Blank", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "dfc-plans"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/securitycontacts\"\r\n| extend emails = tostring(properties.emails), alertNotifications = tostring(properties.alertNotifications.state), notificationsByRole = tostring(properties.notificationsByRole.state)\r\n| project Subscription = subscriptionId, Emails = emails, ['Alert Notifications'] = alertNotifications, ['Notify Roles'] = notificationsByRole",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Security Contacts & Notifications (CIS 2.x)",
+              "noDataMessage": "No security contact configured. CIS recommends setting a security contact email and enabling notifications.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": { "filter": true }
+            },
+            "name": "dfc-contacts"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isDFCVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "DFC"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# CIS Section 3 — Storage Accounts\r\n---\r\nDirect Resource Graph checks for secure transfer, public network access, blob public access, minimum TLS version, and infrastructure encryption (CIS 3.x). These run independent of Defender for Cloud."
+            },
+            "customWidth": "50",
+            "name": "sto-guide"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "sto-status",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "STOImplementationStatus",
+                  "label": "Implementation Status",
+                  "type": 2,
+                  "typeSettings": { "showDefault": false },
+                  "jsonData": "[\r\n    {\"value\": \"Not Implemented\", \"label\": \"Not Implemented\", \"selected\":true},\r\n    {\"value\": \"Implemented\", \"label\": \"Implemented\"},\r\n    {\"value\": \"Compensating Control\", \"label\": \"Compensating Control\"},\r\n    {\"value\": \"Planned\", \"label\": \"Planned\"},\r\n    {\"value\": \"Out of Scope\", \"label\": \"Out of Scope\"}\r\n]"
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "customWidth": "50",
+            "name": "sto-card"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.storage/storageaccounts'\r\n| extend secureTransfer = tobool(properties.supportsHttpsTrafficOnly)\r\n| extend publicNetworkAccess = tostring(properties.publicNetworkAccess)\r\n| extend allowBlobPublic = tobool(properties.allowBlobPublicAccess)\r\n| extend minTls = tostring(properties.minimumTlsVersion)\r\n| extend infraEncryption = tobool(properties.encryption.requireInfrastructureEncryption)\r\n| extend keySource = tostring(properties.encryption.keySource)\r\n| project name, resourceGroup, location, secureTransfer, publicNetworkAccess, allowBlobPublic, minTls, infraEncryption, keySource, id\r\n| sort by name asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Storage Account Security Configuration (CIS 3.1-3.9)",
+              "noDataMessage": "No storage accounts found in the selected subscriptions.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "secureTransfer",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "true", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  },
+                  {
+                    "columnMatch": "allowBlobPublic",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "false", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "critical", "text": "{0}{1}" }
+                      ]
+                    }
+                  },
+                  {
+                    "columnMatch": "publicNetworkAccess",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "Disabled", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "sto-config"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.storage/storageaccounts'\r\n| extend defaultAction = tostring(properties.networkAcls.defaultAction)\r\n| where defaultAction =~ 'Allow'\r\n| project name, resourceGroup, location, ['Network Default Action'] = defaultAction, id\r\n| sort by name asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Storage Accounts with Open Network ACL (Default Allow)",
+              "noDataMessage": "All storage accounts deny by default network ACL. Good.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "Network Default Action",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [ { "operator": "Default", "representation": "critical", "text": "{0}{1}" } ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "sto-netacl"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isSTOVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "STO"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# CIS Section 4 — Database Services\r\n---\r\nChecks SQL servers/databases for public network access, TLS, Entra-only auth, auditing, and TDE, plus Cosmos/MySQL/PostgreSQL exposure (CIS 4.x)."
+            },
+            "name": "db-guide"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.sql/servers'\r\n| extend publicNetworkAccess = tostring(properties.publicNetworkAccess)\r\n| extend minimalTls = tostring(properties.minimalTlsVersion)\r\n| project name, resourceGroup, location, publicNetworkAccess, minimalTls, id\r\n| sort by name asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "SQL Servers — Public Access & TLS (CIS 4.1.x)",
+              "noDataMessage": "No SQL servers found.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "publicNetworkAccess",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "Disabled", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "customWidth": "50",
+            "name": "db-sql"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.documentdb/databaseaccounts'\r\n| extend publicNetworkAccess = tostring(properties.publicNetworkAccess)\r\n| extend disableLocalAuth = tobool(properties.disableLocalAuth)\r\n| project name, resourceGroup, location, publicNetworkAccess, ['Local Auth Disabled'] = disableLocalAuth, id\r\n| sort by name asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Cosmos DB — Public Access & Local Auth (CIS 4.5.x)",
+              "noDataMessage": "No Cosmos DB accounts found.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "publicNetworkAccess",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "Disabled", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "customWidth": "50",
+            "name": "db-cosmos"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/assessments\"\r\n| extend displayName = tostring(properties.displayName), status = tostring(properties.status.code), severity = tostring(properties.metadata.severity)\r\n| where status == \"Unhealthy\"\r\n| where displayName has_any (\"SQL\", \"database\", \"auditing\", \"Transparent Data Encryption\", \"TDE\", \"MySQL\", \"PostgreSQL\", \"MariaDB\")\r\n| summarize Failed = count() by displayName, severity\r\n| sort by Failed desc\r\n| limit 250",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Database Recommendations (CIS 4.x)",
+              "noDataMessage": "No failing database recommendations, or Defender for Cloud not enabled.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "Failed", "formatter": 4, "formatOptions": { "palette": "yellowOrangeRed" } }
+                ],
+                "filter": true
+              }
+            },
+            "name": "db-recs"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isDBVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "DB"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# CIS Section 5 — Logging & Monitoring\r\n---\r\nVerifies diagnostic settings, activity log retention, and the presence of activity-log alerts for sensitive operations such as NSG, security policy, and SQL firewall changes (CIS 5.x)."
+            },
+            "name": "log-guide"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.insights/activitylogalerts'\r\n| extend enabled = tobool(properties.enabled)\r\n| extend scopes = tostring(properties.scopes)\r\n| project name, resourceGroup, enabled, scopes, id\r\n| sort by name asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Activity Log Alerts (CIS 5.2.x)",
+              "noDataMessage": "No activity log alerts found. CIS recommends alerts for NSG, security policy, and firewall-rule changes.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "enabled",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "true", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "customWidth": "50",
+            "name": "log-alerts"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.operationalinsights/workspaces'\r\n| extend retentionDays = toint(properties.retentionInDays)\r\n| project LogAnalyticsWorkspace = name, resourceGroup, retentionDays, id\r\n| sort by retentionDays asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Log Analytics Retention (CIS 5.x)",
+              "noDataMessage": "No Log Analytics workspaces found.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "retentionDays",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": ">=", "thresholdValue": "90", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "customWidth": "50",
+            "name": "log-retention"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AzureActivity\r\n| where CategoryValue == \"Administrative\"\r\n| where OperationNameValue has_any (\"networkSecurityGroups\", \"securityPolicies\", \"firewallRules\", \"policyAssignments\")\r\n| summarize Changes = count() by OperationNameValue, Caller\r\n| sort by Changes desc\r\n| limit 250",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Sensitive Configuration Changes (Activity Log)",
+              "noDataMessage": "No matching administrative changes in range, or AzureActivity is not connected.",
+              "timeContextFromParameter": "TimeRange",
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [ "{Workspace}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "Changes", "formatter": 4, "formatOptions": { "palette": "yellowOrangeRed" } }
+                ],
+                "filter": true
+              }
+            },
+            "name": "log-changes"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isLOGVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "LOG"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# CIS Section 6 — Networking\r\n---\r\nFlags NSG rules that allow inbound traffic from `0.0.0.0/0` / `*` / `Internet` (especially on RDP 3389 and SSH 22), NSG flow log status, and network watcher coverage (CIS 6.x)."
+            },
+            "customWidth": "50",
+            "name": "net-guide"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "net-status",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "NETImplementationStatus",
+                  "label": "Implementation Status",
+                  "type": 2,
+                  "typeSettings": { "showDefault": false },
+                  "jsonData": "[\r\n    {\"value\": \"Not Implemented\", \"label\": \"Not Implemented\", \"selected\":true},\r\n    {\"value\": \"Implemented\", \"label\": \"Implemented\"},\r\n    {\"value\": \"Compensating Control\", \"label\": \"Compensating Control\"},\r\n    {\"value\": \"Planned\", \"label\": \"Planned\"},\r\n    {\"value\": \"Out of Scope\", \"label\": \"Out of Scope\"}\r\n]"
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "customWidth": "50",
+            "name": "net-card"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.network/networksecuritygroups'\r\n| extend rules = properties.securityRules\r\n| mv-expand rule = rules\r\n| extend access = tostring(rule.properties.access)\r\n| extend direction = tostring(rule.properties.direction)\r\n| extend srcPrefix = tostring(rule.properties.sourceAddressPrefix)\r\n| extend srcPrefixes = rule.properties.sourceAddressPrefixes\r\n| extend destPort = tostring(rule.properties.destinationPortRange)\r\n| extend destPorts = tostring(rule.properties.destinationPortRanges)\r\n| extend protocol = tostring(rule.properties.protocol)\r\n| extend priority = toint(rule.properties.priority)\r\n| extend ruleName = tostring(rule.name)\r\n| where access =~ 'Allow' and direction =~ 'Inbound'\r\n| where srcPrefix in ('0.0.0.0/0','*','Internet') or srcPrefixes has '0.0.0.0/0'\r\n| project NSG = name, resourceGroup, ruleName, direction, protocol, ['Port'] = strcat(destPort, destPorts), ['Source'] = srcPrefix, priority, id\r\n| sort by priority asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "NSG Inbound Rules Allowing 0.0.0.0/0 (CIS 6.1-6.2)",
+              "noDataMessage": "No NSG rules permit inbound traffic from 0.0.0.0/0. Good.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "Source",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [ { "operator": "Default", "representation": "critical", "text": "{0}{1}" } ]
+                    }
+                  },
+                  {
+                    "columnMatch": "Port",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "colors",
+                      "thresholdsGrid": [
+                        { "operator": "contains", "thresholdValue": "3389", "representation": "redBright", "text": "{0}{1} (RDP)" },
+                        { "operator": "contains", "thresholdValue": "22", "representation": "redBright", "text": "{0}{1} (SSH)" },
+                        { "operator": "Default", "representation": "orange", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "net-open-rules"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.network/networkwatchers/flowlogs'\r\n| extend enabled = tobool(properties.enabled)\r\n| extend retentionDays = toint(properties.retentionPolicy.days)\r\n| extend targetNsg = tostring(properties.targetResourceId)\r\n| project name, resourceGroup, enabled, retentionDays, targetNsg\r\n| sort by name asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "NSG Flow Logs (CIS 6.x)",
+              "noDataMessage": "No NSG flow logs found. CIS recommends enabling flow logs with adequate retention.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "enabled",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "true", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "net-flowlogs"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isNETVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "NET"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# CIS Section 7 — Virtual Machines\r\n---\r\nChecks managed disk usage, disk encryption (ADE / encryption-at-host / CMK), and unattached disk encryption (CIS 7.x)."
+            },
+            "name": "vm-guide"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.compute/virtualmachines'\r\n| extend osDiskManaged = isnotempty(properties.storageProfile.osDisk.managedDisk)\r\n| extend securityType = tostring(properties.securityProfile.securityType)\r\n| extend encryptionAtHost = tobool(properties.securityProfile.encryptionAtHost)\r\n| project name, resourceGroup, location, ['Managed OS Disk'] = osDiskManaged, securityType, ['Encryption At Host'] = encryptionAtHost, id\r\n| sort by name asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Virtual Machines — Disk & Host Encryption (CIS 7.x)",
+              "noDataMessage": "No virtual machines found.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "Managed OS Disk",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "true", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "vm-config"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.compute/disks'\r\n| extend encryptionType = tostring(properties.encryption.type)\r\n| extend diskState = tostring(properties.diskState)\r\n| project name, resourceGroup, location, encryptionType, diskState, id\r\n| sort by encryptionType asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Managed Disk Encryption Type (CIS 7.x)",
+              "noDataMessage": "No managed disks found.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "encryptionType",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "contains", "thresholdValue": "CustomerKey", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "2", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "vm-disks"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isVMVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "VM"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# CIS Section 8 — Key Vault\r\n---\r\nReviews Key Vault access model (RBAC vs vault access policies), public network access, soft delete, and purge protection, then enumerates classic access policies where present (CIS 8.x)."
+            },
+            "customWidth": "50",
+            "name": "kv-guide"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "kv-status",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "KVImplementationStatus",
+                  "label": "Implementation Status",
+                  "type": 2,
+                  "typeSettings": { "showDefault": false },
+                  "jsonData": "[\r\n    {\"value\": \"Not Implemented\", \"label\": \"Not Implemented\", \"selected\":true},\r\n    {\"value\": \"Implemented\", \"label\": \"Implemented\"},\r\n    {\"value\": \"Compensating Control\", \"label\": \"Compensating Control\"},\r\n    {\"value\": \"Planned\", \"label\": \"Planned\"},\r\n    {\"value\": \"Out of Scope\", \"label\": \"Out of Scope\"}\r\n]"
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "customWidth": "50",
+            "name": "kv-card"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.keyvault/vaults'\r\n| extend rbacEnabled = tobool(properties.enableRbacAuthorization)\r\n| extend publicNetworkAccess = tostring(properties.publicNetworkAccess)\r\n| extend softDelete = tobool(properties.enableSoftDelete)\r\n| extend purgeProtection = tobool(properties.enablePurgeProtection)\r\n| extend networkDefault = tostring(properties.networkAcls.defaultAction)\r\n| extend policyCount = array_length(properties.accessPolicies)\r\n| project name, resourceGroup, location, ['RBAC Auth'] = rbacEnabled, publicNetworkAccess, ['Soft Delete'] = softDelete, ['Purge Protection'] = purgeProtection, ['Network Default'] = networkDefault, ['Access Policy Count'] = policyCount, id\r\n| sort by name asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Key Vault Configuration (CIS 8.x)",
+              "noDataMessage": "No Key Vaults found in the selected subscriptions.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "Soft Delete",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "true", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  },
+                  {
+                    "columnMatch": "Purge Protection",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "true", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  },
+                  {
+                    "columnMatch": "publicNetworkAccess",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "Disabled", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "kv-config"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.keyvault/vaults'\r\n| where tobool(properties.enableRbacAuthorization) == false\r\n| extend policies = properties.accessPolicies\r\n| mv-expand policy = policies\r\n| extend objectId = tostring(policy.objectId)\r\n| extend keys = tostring(policy.permissions.keys)\r\n| extend secrets = tostring(policy.permissions.secrets)\r\n| extend certificates = tostring(policy.permissions.certificates)\r\n| project Vault = name, resourceGroup, objectId, keys, secrets, certificates, id\r\n| sort by Vault asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Key Vault Access Policies (Vault Access Policy Model)",
+              "noDataMessage": "No vaults using the access-policy model, or all vaults use RBAC. For RBAC vaults, review role assignments at the vault scope.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } }
+                ],
+                "filter": true
+              }
+            },
+            "name": "kv-policies"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isKVVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "KV"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# CIS Section 9 — App Service\r\n---\r\nChecks App Service / Function Apps for HTTPS-only, minimum TLS version, client-cert mode, FTPS state, and managed identity (CIS 9.x)."
+            },
+            "name": "app-guide"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.web/sites'\r\n| extend httpsOnly = tobool(properties.httpsOnly)\r\n| extend identityType = tostring(identity.type)\r\n| project name, resourceGroup, location, kind, ['HTTPS Only'] = httpsOnly, ['Managed Identity'] = identityType, id\r\n| sort by name asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "App Service / Function Apps — HTTPS & Identity (CIS 9.x)",
+              "noDataMessage": "No App Service or Function Apps found.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "HTTPS Only",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "true", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "critical", "text": "{0}{1}" }
+                      ]
+                    }
+                  },
+                  {
+                    "columnMatch": "Managed Identity",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "isNotNull", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "app-config"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "securityresources\r\n| where type == \"microsoft.security/assessments\"\r\n| extend displayName = tostring(properties.displayName), status = tostring(properties.status.code), severity = tostring(properties.metadata.severity)\r\n| where status == \"Unhealthy\"\r\n| where displayName has_any (\"App Service\", \"web app\", \"function app\", \"TLS\", \"FTPS\", \"client certificate\")\r\n| summarize Failed = count() by displayName, severity\r\n| sort by Failed desc\r\n| limit 250",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "App Service Recommendations (CIS 9.x)",
+              "noDataMessage": "No failing App Service recommendations, or Defender for Cloud not enabled.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "Failed", "formatter": 4, "formatOptions": { "palette": "yellowOrangeRed" } }
+                ],
+                "filter": true
+              }
+            },
+            "name": "app-recs"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isAPPVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "APP"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": { "json": "# CIS Section 10 — Miscellaneous\r\n---\r\nThe one VA-applicable Section 10 control is resource locks on mission-critical resources (CIS 10.1). The remaining 10.x entries are marked N/A in the VA baseline." },
+            "name": "misc-guide"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "resources\r\n| where type =~ 'microsoft.authorization/locks'\r\n| extend level = tostring(properties.level)\r\n| extend notes = tostring(properties.notes)\r\n| project name, resourceGroup, level, notes, id\r\n| sort by name asc",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Resource Locks (CIS 10.1)",
+              "noDataMessage": "No resource locks found. CIS 10.1 recommends CanNotDelete or ReadOnly locks on mission-critical resources.",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resourcegraph/resources",
+              "crossComponentResources": [ "{Subscription}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "id", "formatter": 13, "formatOptions": { "linkTarget": "Resource", "showIcon": true } },
+                  {
+                    "columnMatch": "level",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "CanNotDelete", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "==", "thresholdValue": "ReadOnly", "representation": "success", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "3", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "misc-locks"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isMISCVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "MISC"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": { "json": "# VA Baseline Crosswalk — CIS Azure Foundations v2.1.0\r\n---\r\nThe full VA overlay (149 in-scope controls) loaded from your hosted CSV via the **Crosswalk URL** parameter at the top. Columns show how VA treats each CIS control:\r\n\r\n- **VA Action** — Source (check as-is) · VA-Modified (use VA check content) · Excluded (do not assess)\r\n- **VA Deviation** — As is · Upgrade · Equivalent · Not Applicable · Downgrade\r\n- **CAT** — STIG severity (CAT I highlighted red)\r\n- **NIST 800-53** — control mapping for ATO / eMASS packages\r\n\r\nHost `VA-CIS-Crosswalk.csv` internally (storage blob with SAS token, SharePoint raw link, or internal git raw) and paste the URL into the **Crosswalk URL** pill. The grid stays empty until the URL is set; the **VA-Excluded Controls** panel below is embedded and always available." },
+            "name": "vax-guide"
+          },
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "vaaction-001",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "VAAction",
+                  "label": "VA Action",
+                  "type": 2,
+                  "isRequired": true,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "value": [ "value::all" ],
+                  "typeSettings": { "additionalResourceOptions": [ "value::all" ], "showDefault": false },
+                  "jsonData": "[{\"value\":\"Source\",\"label\":\"Source\"},{\"value\":\"VA-Modified\",\"label\":\"VA-Modified\"},{\"value\":\"Excluded\",\"label\":\"Excluded\"}]"
+                },
+                {
+                  "id": "vacat-001",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "VACat",
+                  "label": "CAT Severity",
+                  "type": 2,
+                  "isRequired": true,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "value": [ "value::all" ],
+                  "typeSettings": { "additionalResourceOptions": [ "value::all" ], "showDefault": false },
+                  "jsonData": "[{\"value\":\"CAT I\",\"label\":\"CAT I\"},{\"value\":\"CAT II\",\"label\":\"CAT II\"}]"
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "vax-filters"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "let VABaseline = datatable(CIS:string, Section:int, ControlTitle:string, VAAction:string, VADeviation:string, CAT:string, NIST:string)[\r\n\"1.1.1\",1,\"Ensure Security Defaults is enabled on Microsoft Entra ID\",\"Source\",\"As is\",\"CAT II\",\"CM-6\",\r\n\"1.1.2\",1,\"Ensure that 'Multi-Factor Auth Status' is 'Enabled' for all Privileged Users\",\"Excluded\",\"Not Applicable\",\"CAT II\",\"IA-2(1)\",\r\n\"1.1.3\",1,\"Ensure that 'Multi-Factor Auth Status' is 'Enabled' for all Non-Privileged Users\",\"Excluded\",\"Not Applicable\",\"CAT II\",\"IA-2(1) IA-2(2) IA-2(3) IA-2(4)\",\r\n\"1.1.4\",1,\"Ensure that 'Allow users to remember multi-factor authentication on devices they trust'...\",\"Source\",\"As is\",\"CAT I\",\"IA-2(1) IA-2(2) IA-2(3) IA-2(4)\",\r\n\"1.2.1\",1,\"Ensure Trusted Locations Are Defined\",\"Source\",\"As is\",\"CAT II\",\"CM-6\",\r\n\"1.2.2\",1,\"Ensure that an exclusionary Geographic Access Policy is considered\",\"Source\",\"As is\",\"CAT II\",\"CA-3\",\r\n\"1.2.3\",1,\"Ensure that A Multi-factor Authentication Policy Exists for Administrative Groups\",\"Source\",\"As is\",\"CAT I\",\"IA-2(1)\",\r\n\"1.2.4\",1,\"Ensure that A Multi-factor Authentication Policy Exists for All Users\",\"Source\",\"As is\",\"CAT I\",\"IA-2(1) IA-2(2) IA-2(3) IA-2(4)\",\r\n\"1.2.5\",1,\"Ensure Multi-factor Authentication is Required for Risky Sign-ins\",\"Source\",\"As is\",\"CAT I\",\"IA-2(1) I
+              "size": 0,
+              "showAnalytics": true,
+              "title": "VA Baseline Crosswalk (149 in-scope controls)",
+              "noDataMessage": "Set the Crosswalk URL parameter at the top to your hosted VA-CIS-Crosswalk.csv. See the panel guide above.",
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [ "{Workspace}" ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "VAAction",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "colors",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "Excluded", "representation": "redBright", "text": "{0}{1}" },
+                        { "operator": "==", "thresholdValue": "VA-Modified", "representation": "orange", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "green", "text": "{0}{1}" }
+                      ]
+                    }
+                  },
+                  {
+                    "columnMatch": "CAT",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "colors",
+                      "thresholdsGrid": [
+                        { "operator": "==", "thresholdValue": "CAT I", "representation": "redBright", "text": "{0}{1}" },
+                        { "operator": "Default", "representation": "orange", "text": "{0}{1}" }
+                      ]
+                    }
+                  }
+                ],
+                "filter": true
+              }
+            },
+            "name": "vax-grid"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "datatable(CIS:string, ControlTitle:string, CAT:string, Reason:string)[\r\n\"1.1.2\",\"MFA Enabled for all Privileged Users\",\"CAT II\",\"On-prem ADFS handles MFA outside Azure\",\r\n\"1.1.3\",\"MFA Enabled for all Non-Privileged Users\",\"CAT II\",\"On-prem ADFS handles MFA outside Azure\",\r\n\"1.5\",\"Number of methods required to reset = 2\",\"CAT II\",\"Not Applicable\",\r\n\"1.21\",\"MFA to register/join devices with Entra ID\",\"CAT I\",\"VA deviation - not checked\",\r\n\"1.22\",\"No Custom Subscription Administrator Roles Exist\",\"CAT II\",\"Custom RBAC used to enhance posture\",\r\n\"2.2.1\",\"Microsoft Defender for IoT Hub = On\",\"CAT II\",\"Not utilized; Level 2 control, added cost\"\r\n]",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "⛔ VA-Excluded Controls (Do Not Assess) — embedded, always available",
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [ "{Workspace}" ],
+              "gridSettings": {
+                "formatters": [
+                  { "columnMatch": "CIS", "formatter": 18, "formatOptions": { "thresholdsOptions": "icons", "thresholdsGrid": [ { "operator": "Default", "representation": "critical", "text": "{0}{1}" } ] } }
+                ],
+                "filter": true
+              }
+            },
+            "name": "vax-excluded"
+          }
+        ]
+      },
+      "conditionalVisibility": { "parameterName": "isVAXVisible", "comparison": "isEqualTo", "value": "true" },
+      "name": "VAX"
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/your-rg/providers/microsoft.operationalinsights/workspaces/your-workspace"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

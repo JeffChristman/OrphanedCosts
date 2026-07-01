@@ -1,0 +1,205 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>Sentinel THEN vs NOW - VA Report Comparison</title>
+<style>
+ body{font-family:Segoe UI,Arial,sans-serif;margin:0;color:#1a1a1a;background:#f4f6f8;}
+ .banner{background:#fff3cd;border:1px solid #ffe69c;color:#664d03;padding:10px 24px;font-size:12px;font-weight:600;}
+ .hdr{background:#0b3d6b;color:#fff;padding:24px;}
+ .hdr h1{margin:0;font-size:22px;} .hdr p{margin:4px 0 0;font-size:13px;opacity:.85;}
+ .wrap{max-width:1360px;margin:20px auto;padding:0 24px;}
+ .meta{background:#fff;border-radius:8px;padding:16px 20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:13px;}
+ .meta b{display:inline-block;width:185px;color:#0b3d6b;}
+ .sum{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+ .pill{background:#fff;border-radius:8px;padding:10px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-direction:column;}
+ .pill b{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;} .pill span{font-size:22px;font-weight:700;}
+ .callout{background:#fff4f4;border:1px solid #f3c2c2;border-radius:8px;padding:16px 20px;margin-bottom:20px;}
+ .callout h2{margin:0 0 8px;font-size:16px;color:#7d1414;} .callout ul{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.7;}
+ h2.sec{color:#0b3d6b;font-size:17px;margin:26px 0 10px;border-bottom:2px solid #0b3d6b;padding-bottom:4px;}
+ table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:10px;}
+ th{background:#0b3d6b;color:#fff;text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+ td{padding:10px 12px;border-top:1px solid #eee;font-size:12.5px;vertical-align:top;}
+ tr:nth-child(even) td{background:#fafbfc;}
+ .badge{color:#fff;padding:2px 10px;border-radius:12px;font-weight:600;font-size:11px;display:inline-block;}
+ .sub{color:#888;font-size:11px;margin-top:3px;} .then{color:#777;font-style:italic;max-width:280px;} .now{font-weight:600;max-width:300px;}
+ .flag{display:block;color:#c62828;font-size:10px;font-weight:600;margin-top:4px;}
+ .foot{text-align:center;color:#888;font-size:11px;margin:24px 0;}
+</style></head><body>
+<div class="banner">FOR OFFICIAL USE ONLY (FOUO) &mdash; PRE-DECISIONAL. Handle per DHS/VA policy. Not for public release.</div>
+<div class="hdr"><h1>Microsoft Sentinel &mdash; THEN (VA Report) vs NOW (Live Configuration)</h1>
+<p>Blended baseline: CIS Azure Foundations &bull; Microsoft Sentinel best practices &bull; NIST SP 800-53 Rev 5</p></div>
+<div class="wrap">
+ <div class="meta">
+  <div><b>Central Workspace:</b> vaecla-security-gov</div>
+  <div><b>Cloud:</b> AzureUSGovernment</div>
+  <div><b>Subscriptions Checked:</b> 106</div>
+  <div><b>Collection Errors:</b> 0</div>
+  <div><b>Data Collected:</b> 06/29/2026 13:38:55</div>
+  <div><b>Analysis Generated:</b> 2026-06-29 14:07:52 UTC</div>
+  <div><b>THEN baseline:</b> VA CSOC Toolset Configuration Report, Dec 22, 2025</div>
+ </div>
+ <div class="sum"><div class='pill' style='border-left:5px solid #c62828'><b>GAP</b><span>2</span></div>
+<div class='pill' style='border-left:5px solid #ef6c00'><b>REVIEW</b><span>1</span></div>
+<div class='pill' style='border-left:5px solid #00695c'><b>NEW</b><span>8</span></div>
+<div class='pill' style='border-left:5px solid #2e7d32'><b>PASS</b><span>5</span></div>
+<div class='pill' style='border-left:5px solid #1565c0'><b>INFO</b><span>3</span></div></div>
+ <div class="callout"><h2>&#9888; Where reality diverges from the original report</h2>
+<p>The report framed these as routine "optimization opportunities" or asserted capabilities the live configuration does not confirm. They warrant attention beyond the report's tone:</p>
+<ul><li><b>Automation Rules</b> (3.1) &mdash; THEN: &#39;Automation rules have not yet been widely implemented&#39; - framed as expected maturity step.<br>NOW: 0 automation rules configured today</li>
+<li><b>UEBA</b> (3.6) &mdash; THEN: UEBA &#39;fully enabled&#39; in Government.<br>NOW: enabled=; sources=AuditLogs, AzureActivity, SecurityEvent, SigninLogs</li></ul></div>
+ <h2 class="sec">Part A &mdash; Original Report Findings: THEN vs NOW</h2>
+ <table><thead><tr><th>Area</th><th>Status</th><th>THEN (report said)</th><th>NOW (live)</th><th>Baseline</th><th>Recommendation</th></tr></thead>
+ <tbody><tr>
+ <td><b>Automation Rules</b><div class='sub'>Report &sect;3.1</div></td>
+ <td><span class="badge" style="background:#c62828">GAP</span><span class='flag'>&#9888; diverges from report</span></td>
+ <td class="then">&#39;Automation rules have not yet been widely implemented&#39; - framed as expected maturity step.</td>
+ <td class="now">0 automation rules configured today</td>
+ <td>CIS Azure 5 / NIST IR-4(1),SI-4 / MS SOAR</td>
+ <td>Still zero since the report - playbooks remain unorchestrated. Add routing/enrichment/escalation rules.</td>
+</tr>
+<tr>
+ <td><b>UEBA</b><div class='sub'>Report &sect;3.6</div></td>
+ <td><span class="badge" style="background:#c62828">GAP</span><span class='flag'>&#9888; diverges from report</span></td>
+ <td class="then">UEBA &#39;fully enabled&#39; in Government.</td>
+ <td class="now">enabled=; sources=AuditLogs, AzureActivity, SecurityEvent, SigninLogs</td>
+ <td>CIS Azure 1.x / NIST AU-6(3),SI-4</td>
+ <td>Confirm identity+endpoint sources feed entity profiles.</td>
+</tr>
+<tr>
+ <td><b>Summary Rules</b><div class='sub'>Report &sect;3.2</div></td>
+ <td><span class="badge" style="background:#ef6c00">REVIEW</span></td>
+ <td class="then">&#39;Summary rules have not been broadly deployed&#39; - called not required for normal function.</td>
+ <td class="now">Still 0 summary rules</td>
+ <td>MS Sentinel perf/cost / NIST AU-6</td>
+ <td>Unchanged; deploy on high-volume sources where Gov parity allows.</td>
+</tr>
+<tr>
+ <td><b>Data Connectors &amp; Ingestion</b><div class='sub'>Report &sect;3.3</div></td>
+ <td><span class="badge" style="background:#2e7d32">PASS</span></td>
+ <td class="then">&#39;A small number of connectors can be further refined&#39; - typical optimization.</td>
+ <td class="now">105 connector(s); core tables fresh: SigninLogs, AuditLogs, AzureActivity, Syslog</td>
+ <td>CIS Azure 5.1.x / NIST AU-2,AU-12 / MS health</td>
+ <td>Core ingestion healthy; maintain monitoring.</td>
+</tr>
+<tr>
+ <td><b>Analytics / Alerting</b><div class='sub'>Report &sect;3.5</div></td>
+ <td><span class="badge" style="background:#2e7d32">PASS</span></td>
+ <td class="then">&#39;Functional analytics and alerting in place&#39;; opportunity to expand.</td>
+ <td class="now">54 enabled rule(s); 19 identity/access detections</td>
+ <td>CIS Azure 5.2.x+1.x / NIST SI-4,AU-6</td>
+ <td>Add identity-anomaly, privilege-escalation, access detections.</td>
+</tr>
+<tr>
+ <td><b>Content Hub Currency</b><div class='sub'>Report &sect;3.7</div></td>
+ <td><span class="badge" style="background:#2e7d32">PASS</span></td>
+ <td class="then">&#39;Some packages remain available for update&#39; - normal.</td>
+ <td class="now">0 installed, all current</td>
+ <td>MS content / NIST SI-3,SI-4</td>
+ <td>Maintain cadence.</td>
+</tr>
+<tr>
+ <td><b>Workspace Manager (Preview)</b><div class='sub'>Report &sect;3.4</div></td>
+ <td><span class="badge" style="background:#1565c0">INFO</span></td>
+ <td class="then">Absence &#39;expected and appropriate&#39; under FedRAMP; monitor only.</td>
+ <td class="now">Onboarding state present</td>
+ <td>Governance / NIST CM-2</td>
+ <td>Agree; track Preview-&gt;GA then reassess.</td>
+</tr></tbody></table>
+ <h2 class="sec">Part B &mdash; Configured Now but Not Assessed in the Original Report</h2>
+ <table><thead><tr><th>Area</th><th>Status</th><th>THEN</th><th>NOW (live)</th><th>Baseline</th><th>Recommendation</th></tr></thead>
+ <tbody><tr>
+ <td><b>Threat Intelligence</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#00695c">NEW</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">Indicators(30d)=0; Active=0; Sources=0</td>
+ <td>MS TI / NIST PM-16,SI-5</td>
+ <td>Confirm TI feeds active and matched against logs.</td>
+</tr>
+<tr>
+ <td><b>Watchlists</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#00695c">NEW</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">19 configured now</td>
+ <td>MS Sentinel best practice</td>
+ <td>Use watchlists for allow/deny, VIP, asset context.</td>
+</tr>
+<tr>
+ <td><b>Hunting Queries</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#00695c">NEW</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">19 configured now</td>
+ <td>NIST SI-4 / MS hunting</td>
+ <td>Operationalize proactive hunts; schedule recurring hunts.</td>
+</tr>
+<tr>
+ <td><b>Bookmarks</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#00695c">NEW</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">1 configured now</td>
+ <td>NIST IR-4 / MS hunting</td>
+ <td>Evidence of active investigation/hunting practice.</td>
+</tr>
+<tr>
+ <td><b>Workbooks</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#00695c">NEW</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">80 configured now</td>
+ <td>MS visualization best practice</td>
+ <td>Confirm operational dashboards exist for CSOC.</td>
+</tr>
+<tr>
+ <td><b>Playbooks (Logic Apps)</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#00695c">NEW</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">112 playbook(s), 0 enabled</td>
+ <td>MS SOAR / NIST IR-4(1)</td>
+ <td>Tie playbooks to automation rules for response.</td>
+</tr>
+<tr>
+ <td><b>RBAC Assignments (workspace)</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#00695c">NEW</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">166 configured now</td>
+ <td>CIS Azure 1.x / NIST AC-2,AC-6</td>
+ <td>Review least-privilege; watch for broad Owner/Contributor.</td>
+</tr>
+<tr>
+ <td><b>Table Tiers (Analytics/Basic/Aux)</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#00695c">NEW</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">500 tables; 0 on non-Analytics tier</td>
+ <td>MS cost tiers (newer capability)</td>
+ <td>Newer tiering capability; balance cost vs queryability per table.</td>
+</tr>
+<tr>
+ <td><b>Subscription Log Forwarding</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#2e7d32">PASS</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">106 of 106 subscription(s) forward Activity Log to central workspace</td>
+ <td>CIS Azure 5.1.x / NIST AU-2,AU-12</td>
+ <td>Report never assessed central forwarding; enforce via Azure Policy DeployIfNotExists.</td>
+</tr>
+<tr>
+ <td><b>MITRE ATT&amp;CK Coverage</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#2e7d32">PASS</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">Enabled rules: 54; tactics covered: 13/16; techniques: 27. Uncovered tactics: Reconnaissance, ImpairProcessControl, InhibitResponseFunction</td>
+ <td>MS ATT&amp;CK coverage / NIST CA-8,SI-4</td>
+ <td>Close uncovered tactics with targeted analytics rules; use the MITRE coverage blade.</td>
+</tr>
+<tr>
+ <td><b>Anomaly Rules</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#1565c0">INFO</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">0 configured now</td>
+ <td>MS UEBA/ML / NIST SI-4</td>
+ <td>Enable/tune ML anomaly detections.</td>
+</tr>
+<tr>
+ <td><b>Retention &amp; SKU</b><div class='sub'>new since report</div></td>
+ <td><span class="badge" style="background:#1565c0">INFO</span></td>
+ <td class="then">Not assessed in the original report.</td>
+ <td class="now">Retention=365d; SKU=CapacityReservation; DailyQuota=-1GB</td>
+ <td>NIST AU-11 / CIS Azure 5</td>
+ <td>Confirm retention meets VA/FedRAMP record requirements.</td>
+</tr></tbody></table>
+ <div class="foot">FOR OFFICIAL USE ONLY &bull; PRE-DECISIONAL &bull; Status legend: CRITICAL/GAP = deficiency, REVIEW = unverified, CHANGED = improved since report, NEW = capability now present, PASS/INFO = healthy/context. Baselines are closest-fit control families, not literal citations.</div>
+</div></body></html>
